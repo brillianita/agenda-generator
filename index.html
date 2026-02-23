@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Generator Agenda Diskominfo Makassar</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #0a1f3c 0%, #1a3a5c 60%, #0d2944 100%);
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .app-header {
+      text-align: center;
+      padding: 20px 16px 16px;
+      margin-bottom: 16px;
+    }
+
+    .app-header h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #f0c040;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+    }
+
+    .app-header p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.78rem;
+      margin-top: 6px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #1a3a5c;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e8edf2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 5px;
+    }
+
+    .field input {
+      width: 100%;
+      border: 1.5px solid #d8e2ee;
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-size: 0.93rem;
+      color: #222;
+      background: #f8fafc;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .field input:focus {
+      border-color: #1a3a5c;
+      box-shadow: 0 0 0 3px rgba(26, 58, 92, 0.1);
+      background: #fff;
+    }
+
+    .row2 {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row2 .field {
+      flex: 1;
+    }
+
+    .paste-area {
+      width: 100%;
+      border: 2px dashed #b8cce0;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 0.88rem;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #222;
+      background: #f5f8fc;
+      outline: none;
+      resize: vertical;
+      min-height: 200px;
+      line-height: 1.65;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .paste-area:focus {
+      border-color: #1a3a5c;
+      border-style: solid;
+      box-shadow: 0 0 0 3px rgba(26, 58, 92, 0.08);
+      background: #fff;
+    }
+
+    .paste-hint {
+      font-size: 0.75rem;
+      color: #999;
+      margin-top: 8px;
+      line-height: 1.5;
+      background: #f0f4f8;
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    .parsed-list {
+      margin-top: 14px;
+    }
+
+    .parsed-item {
+      background: #f0f6ff;
+      border: 1.5px solid #c5d8f0;
+      border-left: 4px solid #1a3a5c;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      font-size: 0.84rem;
+      color: #222;
+      line-height: 1.8;
+    }
+
+    .parsed-item .pi-no {
+      font-weight: 800;
+      color: #1a3a5c;
+      font-size: 0.82rem;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .parsed-item span.lbl {
+      color: #888;
+      font-weight: 600;
+    }
+
+    .parsed-item span.zoom-lbl {
+      color: #1a4a8a;
+      font-weight: 700;
+    }
+
+    .parse-status {
+      font-size: 0.82rem;
+      padding: 9px 13px;
+      border-radius: 9px;
+      margin-top: 10px;
+      display: none;
+      font-weight: 600;
+    }
+
+    .parse-status.ok {
+      background: #e6f9ef;
+      color: #1a7a40;
+      border: 1px solid #a3e0bc;
+    }
+
+    .parse-status.err {
+      background: #fff0f0;
+      color: #c00;
+      border: 1px solid #f0b8b8;
+    }
+
+    .sample-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #e8f0fa;
+      color: #1a3a5c;
+      border: 1.5px solid #b8cce0;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 10px;
+    }
+
+    .sample-chip:hover {
+      background: #c5d8f0;
+    }
+
+    .btn-parse {
+      width: 100%;
+      background: #1a3a5c;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-parse:hover {
+      background: #0e2640;
+    }
+
+    .btn-parse:active {
+      transform: scale(0.98);
+    }
+
+    .btn-generate {
+      width: 100%;
+      background: linear-gradient(135deg, #c9973a, #e8be6a);
+      color: #1a1000;
+      border: none;
+      border-radius: 14px;
+      padding: 17px;
+      font-size: 1.02rem;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+      transition: opacity 0.2s, transform 0.1s;
+      box-shadow: 0 5px 18px rgba(201, 151, 58, 0.38);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-bottom: 22px;
+    }
+
+    .btn-generate:hover {
+      opacity: 0.92;
+    }
+
+    .btn-generate:active {
+      transform: scale(0.98);
+    }
+
+    .btn-generate:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    #output-section {
+      display: none;
+    }
+
+    .output-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      margin-bottom: 20px;
+    }
+
+    #agenda-canvas {
+      width: 100%;
+      border-radius: 10px;
+      display: block;
+      border: 1px solid #dde;
+    }
+
+    .btn-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      background: #1a3a5c;
+      color: #fff;
+      border-radius: 10px;
+      padding: 14px;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-top: 14px;
+      transition: background 0.2s;
+    }
+
+    .btn-download:hover {
+      background: #0e2640;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <div class="app-header">
+    <h1>🏛️ Generator Agenda Resmi<br>Diskominfo Kota Makassar</h1>
+    <p>Paste teks agenda → otomatis di-parse → generate gambar PNG</p>
+  </div>
+
+  <!-- STEP 1: INFO DOKUMEN -->
+  <div class="card">
+    <div class="card-title">📅 Informasi Dokumen</div>
+    <div class="row2">
+      <div class="field">
+        <label>Hari</label>
+        <input type="text" id="inp-hari" value="Hari terisi otomatis" placeholder="Hari terisi otomatis" disabled>
+      </div>
+      <div class="field">
+        <label>Tanggal</label>
+        <input type="text" id="inp-tanggal" value="Tanggal terisi otomatis" disabled>
+      </div>
+    </div>
+    <div class="field">
+      <label>Penanda Tangan</label>
+      <input type="text" id="inp-ttd" value="Kepala Sub Umum dan Kepegawaian" disabled>
+    </div>
+    <!-- Logo dimuat otomatis dari folder images/ -->
+    <img id="prev-left" src="images/pemkot.png" class="logo-preview" style="display:none">
+    <img id="prev-right" src="images/logo-diskominfo-makassar.png" class="logo-preview" style="display:none">
+  </div>
+
+  <!-- STEP 2: PASTE -->
+  <div class="card">
+    <div class="card-title">📋 Input Teks Agenda</div>
+
+    <button class="sample-chip" onclick="isiContoh()">✨ Isi Contoh</button>
+
+    <textarea class="paste-area" id="txt-agenda" placeholder="Paste teks agenda WA langsung di sini...
+
+Contoh format lengkap:
+Assalamualaikum Tabe Mohon Ijin Menyampaikan :
+AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
+(Selasa, 24 Februari 2026)
+1.) UNDANGAN
+* Jam : 10.00 Wita
+* Acara : Nama Acara
+* Tempat : Nama Tempat
+* Disposisi : Kepala Dinas"></textarea>
+
+    <div class="paste-hint">
+      💡 Paste teks WA lengkap — <strong>hari &amp; tanggal</strong> akan otomatis terdeteksi dari format <strong>(Hari,
+        DD Bulan YYYY)</strong>
+    </div>
+
+    <!-- <button class="btn-parse" onclick="parseAgenda()">🔍 Parse &amp; Tampilkan Agenda</button> -->
+
+    <div id="parse-status" class="parse-status"></div>
+    <div class="parsed-list" id="parsed-list"></div>
+  </div>
+
+  <!-- GENERATE BUTTON -->
+  <button class="btn-generate" id="btn-gen" onclick="generateImage()">
+    🖼️ GENERATE GAMBAR AGENDA
+  </button>
+
+  <!-- OUTPUT -->
+  <div id="output-section">
+    <div class="output-card">
+      <div class="card-title">✅ Hasil Generate</div>
+      <canvas id="agenda-canvas"></canvas>
+      <a class="btn-download" id="dl-link" download="Agenda-Diskominfo-Makassar.png">
+        ⬇️ Download Gambar PNG
+      </a>
+    </div>
+  </div>
+
+  <script>
+    let parsedAgendas = [];
+
+    // ── Load image helper dari src URL ──
+    function loadImgFromSrc(src) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    }
+
+    const SAMPLE = `Assalamualaikum Tabe Mohon Ijin Menyampaikan :
+AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR 
+(Senin, 23 Februari 2026)
+1.) UNDANGAN
+* Jam : 09.00 Wita
+* Acara : Rapat Koordinasi Khusus Tim Pengendalian Inflasi Daerah (TPID) Kota Makassar bersama Kementerian Dalam Negeri RI
+* Tempat : Zoom Meeting
+    Meeting ID : 677 057 3756
+    Pasword : INFLASI
+* Disposisi : Kepala Dinas dan Kabid PDE
+
+2.) AUDIENSI
+* Jam : 11.00 Wita
+* Acara : Mendampingi Wali Kota menerima Audiensi dari Badan Pusat Statistik Kota Makassar terkait Sensus Ekonomi 2026 (SE2026)
+* Tempat : Ruang Wali Kota Lt.2 Kantor Wali Kota Makassar
+* Disposisi : Kepala Dinas didampingi Kabid PDE
+
+3.) UNDANGAN
+* Jam : 13.00 Wita
+* Acara : Monitoring dan Evaluasi Pelaksanaan Kebijakan Pemenuhan Hak Anak pada Lembaga Pemerintah, Non Pemerintah, Media dan Dunia Usaha Kewenangan Kab/Kota TA.2026
+* Tempat : Hotel Vasaka Makassar
+* Disposisi : Kabid PDE
+
+4.) UNDANGAN
+* Jam : 14.00 Wita
+* Acara : Verifikasi dan Asistensi Rancangan Awal Rencana Kerja Perangkat Daerah (RENJA-PD) Tahun 2027
+* Tempat : Ruang Rapat Bappeda Balaikota Makassar
+* Disposisi : PPTK dan Kasubag Perencanaan dan Pelaporan
+
+5.) AUDIENSI
+* Jam : 15.00 Wita
+* Acara : Mendampingi Wali Kota menerima Audiensi dari PT. Persaudaraan Sepakbola Makassar terkait Kolaborasi bersama Aplikasi Lontara+ Promosi Pariwisata dan Program Pemerintah
+* Tempat : Ruang Wali Kota Lt.2 Kantor Wali Kota Makassar
+* Disposisi : Kepala Dinas didampingi Kabid Aptika
+
+6.) UNDANGAN
+* Jam : 17.30 Wita
+* Acara : Mendampingi Wali Kota melaksanakan Buka Puasa bersama Shalat Isya & Tarwih Berjamaah sebagai Rangkaian Safari Ramadhan Pemerintah Kota Makassar
+* Tempat : Masjid Al-Mujahidin Jl. Maccini Sawah Makassar
+* Disposisi : Kepala Dinas didampingi Kabid PDE/KTU UPTD War Room`;
+
+    function isiContoh() {
+      document.getElementById('txt-agenda').value = SAMPLE;
+      parseAgenda();
+    }
+
+    // ── Ekstrak hari & tanggal dari baris "(Hari, DD Bulan YYYY)"
+    function extractHariTanggal(raw) {
+      // Cari pola: (Senin, 24 Februari 2026) atau (Senin, 24 Feb 2026)
+      const m = raw.match(/\(\s*(Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)[,\s]+(\d{1,2}\s+\w+\s+\d{4})\s*\)/i);
+      if (m) return { hari: m[1], tanggal: m[2].trim() };
+      return null;
+    }
+
+    function parseAgenda() {
+      const raw = document.getElementById('txt-agenda').value.trim();
+      const listEl = document.getElementById('parsed-list');
+      parsedAgendas = [];
+
+      if (!raw) {
+        showStatus('err', '⚠️ Teks agenda kosong!');
+        listEl.innerHTML = '';
+        document.getElementById('btn-gen').disabled = true;
+        return;
+      }
+
+      // ── Auto-isi hari & tanggal dari teks ──
+      const dt = extractHariTanggal(raw);
+      if (dt) {
+        document.getElementById('inp-hari').value = dt.hari;
+        document.getElementById('inp-tanggal').value = dt.tanggal;
+        // visual feedback
+        ['inp-hari', 'inp-tanggal'].forEach(id => {
+          const el = document.getElementById(id);
+          el.style.borderColor = '#1a7a40';
+          el.style.background = '#edfff4';
+          setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; }, 2000);
+        });
+      }
+
+      // Split on lines that start with a number like "1." "1)" "1.)"
+      const blocks = raw.split(/(?=^\d+[.)]{1,2}\s)/m);
+
+      blocks.forEach(block => {
+        const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+        if (!lines.length) return;
+
+        const ag = { no: 0, jam: '-', acara: '-', tempat: '-', disposisi: '-', zoomId: '', zoomPass: '' };
+        const noM = lines[0].match(/^(\d+)/);
+        if (noM) ag.no = parseInt(noM[1]);
+
+        let readingTempat = false;
+        lines.forEach(line => {
+          const cl = line.replace(/^\*\s*/, '').trim();
+          const kv = (prefix) => cl.replace(new RegExp(`^${prefix}\\s*:\\s*`, 'i'), '').trim();
+          if (/^jam\s*:/i.test(cl)) { ag.jam = kv('jam'); readingTempat = false; }
+          else if (/^acara\s*:/i.test(cl)) { ag.acara = kv('acara'); readingTempat = false; }
+          else if (/^tempat\s*:/i.test(cl)) { ag.tempat = kv('tempat'); readingTempat = true; }
+          else if (/^disposisi\s*:/i.test(cl)) { ag.disposisi = kv('disposisi'); readingTempat = false; }
+          else if (readingTempat) {
+            if (/meeting\s*id\s*:/i.test(cl)) ag.zoomId = cl.replace(/^meeting\s*id\s*:\s*/i, '').trim();
+            else if (/^pas[a-z]*\s*:/i.test(cl)) ag.zoomPass = cl.replace(/^pas[a-z]*\s*:\s*/i, '').trim();
+          }
+        });
+
+        if (ag.acara !== '-' || ag.jam !== '-') {
+          if (!ag.no) ag.no = parsedAgendas.length + 1;
+          parsedAgendas.push(ag);
+        }
+      });
+
+      if (!parsedAgendas.length) {
+        showStatus('err', '❌ Gagal parse. Pastikan ada baris * Jam, * Acara, * Tempat, * Disposisi.');
+        listEl.innerHTML = '';
+        document.getElementById('btn-gen').disabled = true;
+        return;
+      }
+
+      const infoHari = dt
+        ? `<br><small>📅 Hari & tanggal otomatis terdeteksi: <strong>${dt.hari}, ${dt.tanggal}</strong></small>`
+        : '';
+
+      listEl.innerHTML = parsedAgendas.map((ag, i) => `
+    <div class="parsed-item">
+      <div class="pi-no">📌 Agenda ${ag.no || i + 1}</div>
+      <span class="lbl">Jam :</span> ${ag.jam}<br>
+      <span class="lbl">Acara :</span> ${ag.acara}<br>
+      <span class="lbl">Tempat :</span> ${ag.tempat}
+      ${ag.zoomId ? `<br><span class="lbl zoom-lbl">📹 Meeting ID :</span> <strong>${ag.zoomId}</strong>` : ''}
+      ${ag.zoomPass ? `<br><span class="lbl zoom-lbl">🔑 Password :</span> <strong>${ag.zoomPass}</strong>` : ''}<br>
+      <span class="lbl">Disposisi :</span> ${ag.disposisi}
+    </div>`).join('');
+
+      showStatus('ok', `✅ ${parsedAgendas.length} agenda berhasil di-parse!${infoHari}`);
+      document.getElementById('btn-gen').disabled = false;
+    }
+
+    function showStatus(type, msg) {
+      const el = document.getElementById('parse-status');
+      el.className = 'parse-status ' + type;
+      el.innerHTML = msg;
+      el.style.display = 'block';
+    }
+
+    // ═══════════════════════════════════
+    //  CANVAS GENERATOR
+    // ═══════════════════════════════════
+    async function generateImage() {
+      parseAgenda();
+      if (!parsedAgendas.length) { alert('Parse agenda dulu!'); return; }
+
+      const hari = document.getElementById('inp-hari').value.toUpperCase();
+      const tanggal = document.getElementById('inp-tanggal').value.toUpperCase();
+      const ttdName = document.getElementById('inp-ttd').value;
+
+      const W = 1500;
+      const M = 44;                  // margin
+
+      // Column widths
+      const C_NO = 52;
+      const C_WKT = 120;
+      const C_ACA = 700;
+      const C_TMP = 300;
+      const C_DIS = W - M * 2 - C_NO - C_WKT - C_ACA - C_TMP;
+
+      const LH = 24;           // line-height per text row
+      const ROW_PAD = 22;           // vertical padding inside table cell
+      const FS = 19;           // font-size body
+
+      // ── pre-calc row heights ──
+      const tc = document.createElement('canvas').getContext('2d');
+      tc.font = `${FS}px Arial`;
+
+      function nLines(ctx2, text, maxW) {
+        const words = text.split(' ');
+        let line = '', n = 1;
+        for (const w of words) {
+          const t = line ? line + ' ' + w : w;
+          if (ctx2.measureText(t).width > maxW && line) { n++; line = w; }
+          else line = t;
+        }
+        return n;
+      }
+
+      const rowH = parsedAgendas.map(ag => {
+        // for tempat: count its lines + extra lines for zoom info if present
+        const tempatFull = ag.zoomId
+          ? ag.tempat + ' | ID: ' + ag.zoomId + (ag.zoomPass ? ' | Pass: ' + ag.zoomPass : '')
+          : ag.tempat;
+        const zoomExtra = (ag.zoomId ? 1 : 0) + (ag.zoomPass ? 1 : 0);
+        const h = [
+          nLines(tc, ag.acara, C_ACA - 18) * LH + ROW_PAD * 2,
+          (nLines(tc, ag.tempat, C_TMP - 18) + zoomExtra) * LH + ROW_PAD * 2,
+          nLines(tc, ag.disposisi, C_DIS - 18) * LH + ROW_PAD * 2,
+        ];
+        return Math.max(...h, 72);
+      });
+
+      const HDR_H = 148;
+      const DATE_H = 60;
+      const THEAD_H = 48;
+      const FOOT_H = 185;
+      const TOTAL_H = HDR_H + DATE_H + THEAD_H + rowH.reduce((s, v) => s + v, 0) + FOOT_H;
+
+      const canvas = document.getElementById('agenda-canvas');
+      canvas.width = W;
+      canvas.height = TOTAL_H;
+      const ctx = canvas.getContext('2d');
+
+      // background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, TOTAL_H);
+
+      // double border
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+      ctx.strokeRect(22, 22, W - 44, TOTAL_H - 44);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(28, 28, W - 56, TOTAL_H - 56);
+
+      // ── Load & draw logos dari images/ ──
+      const [imgLeft, imgRight] = await Promise.all([
+        loadImgFromSrc('images/pemkot.png'),
+        loadImgFromSrc('images/logo-diskominfo-makassar.png'),
+      ]);
+      if (imgLeft) ctx.drawImage(imgLeft, 150, 50, 120, 120);
+      else drawShieldLogo(ctx, 40, 26, 98);
+      if (imgRight) ctx.drawImage(imgRight, W - 230, 50, 120, 120);
+      else drawKominfoBox(ctx, W - 182, 26, 116, 92);
+
+      // header text
+      ctx.textAlign = 'center'; ctx.fillStyle = '#000';
+      ctx.font = 'bold 21px Arial';
+      ctx.fillText('AGENDA ACARA', W / 2, 66);
+
+      ctx.font = 'bold 28px Arial';
+      const title = 'DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR';
+      ctx.fillText(title, W / 2, 106);
+      const tw2 = ctx.measureText(title).width;
+      ctx.beginPath();
+      // ctx.lineWidth=2;
+      // ctx.moveTo(W/2-tw2/2,111); ctx.lineTo(W/2+tw2/2,111); ctx.stroke();
+
+      // date
+      ctx.font = 'bold 24px Arial';
+      const dstr = hari + ', ' + tanggal;
+      ctx.fillText(dstr, W / 2, HDR_H + 38);
+      const dw2 = ctx.measureText(dstr).width;
+      ctx.beginPath(); ctx.lineWidth = 1.5;
+      ctx.moveTo(W / 2 - dw2 / 2, HDR_H + 43); ctx.lineTo(W / 2 + dw2 / 2, HDR_H + 43); ctx.stroke();
+
+      // ── TABLE ──
+      const TY = HDR_H + DATE_H;
+      const TX = M;
+      const cols = [
+        { w: C_NO, label: 'No' },
+        { w: C_WKT, label: 'Waktu' },
+        { w: C_ACA, label: 'Acara' },
+        { w: C_TMP, label: 'Tempat' },
+        { w: C_DIS, label: 'Disposisi' },
+      ];
+
+      // thead
+      ctx.fillStyle = '#fff'; ctx.fillRect(TX, TY, W - M * 2, THEAD_H);
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5;
+      ctx.strokeRect(TX, TY, W - M * 2, THEAD_H);
+
+      let cx = TX;
+      ctx.font = `bold ${FS}px Arial`;
+      cols.forEach(col => {
+        ctx.strokeRect(cx, TY, col.w, THEAD_H);
+        ctx.fillStyle = '#000'; ctx.textAlign = 'center';
+        const lx = cx + col.w / 2, ly = TY + THEAD_H / 2 + 8;
+        ctx.fillText(col.label, lx, ly);
+        const lw = ctx.measureText(col.label).width;
+        ctx.beginPath();
+        // ctx.lineWidth=1.5;
+        // ctx.moveTo(lx-lw/2,ly+3); ctx.lineTo(lx+lw/2,ly+3); ctx.stroke();
+        cx += col.w;
+      });
+
+      // rows
+      let ry = TY + THEAD_H;
+      ctx.font = `${FS}px Arial`;
+
+      parsedAgendas.forEach((ag, idx) => {
+        const rh = rowH[idx];
+        cx = TX;
+        ctx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#fff';
+        ctx.fillRect(TX, ry, W - M * 2, rh);
+        cols.forEach(col => {
+          ctx.strokeStyle = '#000';
+          // ctx.lineWidth=1.2;
+          ctx.strokeRect(cx, ry, col.w, rh); cx += col.w;
+        });
+
+        ctx.fillStyle = '#000'; ctx.textAlign = 'center';
+        const mid = ry + rh / 2 + 7;
+
+        ctx.fillText(String(ag.no || idx + 1), TX + C_NO / 2, mid);
+        ctx.fillText(ag.jam, TX + C_NO + C_WKT / 2, mid);
+        wrapUnderline(ctx, ag.acara, TX + C_NO + C_WKT, C_ACA, ry, rh, FS, LH);
+        wrapUnderlineTempat(ctx, ag, TX + C_NO + C_WKT + C_ACA, C_TMP, ry, rh, FS, LH);
+        wrapUnderline(ctx, ag.disposisi, TX + C_NO + C_WKT + C_ACA + C_TMP, C_DIS, ry, rh, FS, LH);
+
+        ry += rh;
+      });
+
+      // footer TTD
+      const fy = ry + 40, fx = W * 0.72;
+      ctx.textAlign = 'center'; ctx.fillStyle = '#000';
+      ctx.font = `${FS}px Arial`;
+
+      underlinedText(ctx, 'Mengetahui,', fx, fy + 10);
+      ctx.fillText('TTD', fx, fy + 52);
+      underlinedText(ctx, ttdName, fx, fy + 96);
+
+      // show output
+      document.getElementById('output-section').style.display = 'block';
+      document.getElementById('dl-link').href = canvas.toDataURL('image/png');
+      setTimeout(() => document.getElementById('output-section').scrollIntoView({ behavior: 'smooth' }), 100);
+    }
+
+    function wrapUnderline(ctx, text, colX, colW, rowY, rowH, fs, lh) {
+      ctx.font = `${fs}px Arial`;
+      const maxW = colW - 18, cx = colX + colW / 2;
+      const words = text.split(' ');
+      let line = '', lines = [];
+      for (const w of words) {
+        const t = line ? line + ' ' + w : w;
+        if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; }
+        else line = t;
+      }
+      if (line) lines.push(line);
+      const totalH = lines.length * lh;
+      let y = rowY + (rowH - totalH) / 2 + lh * 0.82;
+      ctx.textAlign = 'center'; ctx.fillStyle = '#000';
+      lines.forEach(l => {
+        const lw = ctx.measureText(l).width;
+        ctx.fillText(l, cx, y);
+        ctx.beginPath();
+        // ctx.lineWidth=1;
+        // ctx.moveTo(cx-lw/2,y+3); ctx.lineTo(cx+lw/2,y+3); ctx.stroke();
+        y += lh;
+      });
+    }
+
+    function wrapUnderlineTempat(ctx, ag, colX, colW, rowY, rowH, fs, lh) {
+      // Build list of display lines for Tempat
+      const maxW = colW - 18;
+      const cx = colX + colW / 2;
+
+      // Helper: split one string into wrapped lines
+      function splitLines(text) {
+        const words = text.split(' ');
+        let line = '', out = [];
+        for (const w of words) {
+          const t = line ? line + ' ' + w : w;
+          if (ctx.measureText(t).width > maxW && line) { out.push(line); line = w; }
+          else line = t;
+        }
+        if (line) out.push(line);
+        return out;
+      }
+
+      ctx.font = `${fs}px Arial`;
+      const mainLines = splitLines(ag.tempat);
+      const zoomLines = [];
+      if (ag.zoomId) zoomLines.push('ID: ' + ag.zoomId);
+      if (ag.zoomPass) zoomLines.push('Pass: ' + ag.zoomPass);
+
+      const allLines = mainLines.concat(zoomLines);
+      const totalH = allLines.length * lh;
+      let y = rowY + (rowH - totalH) / 2 + lh * 0.82;
+
+      ctx.textAlign = 'center'; ctx.fillStyle = '#000';
+
+      mainLines.forEach(l => {
+        ctx.font = `${fs}px Arial`;
+        const lw = ctx.measureText(l).width;
+        ctx.fillText(l, cx, y);
+        ctx.beginPath();
+        // ctx.lineWidth=1;
+        // ctx.moveTo(cx-lw/2, y+3); ctx.lineTo(cx+lw/2, y+3); ctx.stroke();
+        y += lh;
+      });
+
+      // Zoom lines — italic, smaller, blue-tinted
+      ctx.font = `italic ${fs - 2}px Arial`;
+      ctx.fillStyle = '#1a4a8a';
+      zoomLines.forEach(l => {
+        ctx.fillText(l, cx, y);
+        y += lh;
+      });
+      ctx.fillStyle = '#000'; // reset
+    }
+
+    function underlinedText(ctx, text, x, y) {
+      ctx.fillText(text,x,y);
+      const tw=ctx.measureText(text).width;
+      ctx.beginPath(); 
+      // ctx.lineWidth=1.2;
+      // ctx.moveTo(x-tw/2,y+4); ctx.lineTo(x+tw/2,y+4); ctx.stroke();
+    }
+
+    // ── Vector logos ──
+    function drawShieldLogo(ctx, x, y, size) {
+      ctx.save();
+      ctx.translate(x + size / 2, y + size / 2 + 4);
+
+      const shieldPath = () => {
+        ctx.beginPath();
+        ctx.moveTo(0, -size * 0.47);
+        ctx.lineTo(size * 0.40, -size * 0.22);
+        ctx.lineTo(size * 0.40, size * 0.08);
+        ctx.quadraticCurveTo(size * 0.40, size * 0.30, 0, size * 0.50);
+        ctx.quadraticCurveTo(-size * 0.40, size * 0.30, -size * 0.40, size * 0.08);
+        ctx.lineTo(-size * 0.40, -size * 0.22);
+        ctx.closePath();
+      };
+
+      shieldPath(); ctx.fillStyle = '#fff'; ctx.fill();
+      ctx.strokeStyle = '#8b0000'; ctx.lineWidth = 2; ctx.stroke();
+
+      ctx.save(); ctx.scale(0.73, 0.73);
+      shieldPath(); ctx.fillStyle = '#f5d060'; ctx.fill();
+      ctx.restore();
+
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(-size * 0.07, -size * 0.32, size * 0.14, size * 0.60);
+      ctx.fillRect(-size * 0.27, -size * 0.07, size * 0.54, size * 0.14);
+
+      ctx.restore();
+    }
+
+    function drawKominfoBox(ctx, x, y, w, h) {
+      ctx.save(); ctx.translate(x, y);
+
+      ctx.beginPath(); rrect(ctx, 0, 0, w, h, 10);
+      ctx.fillStyle = '#fff'; ctx.fill();
+
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${Math.floor(h * 0.42)}px Arial`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('K', w * 0.30, h * 0.38);
+
+      ctx.beginPath();
+      ctx.arc(w * 0.68, h * 0.36, h * 0.21, 0, Math.PI * 2);
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 5; ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(w * 0.68, h * 0.36, h * 0.10, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff'; ctx.fill();
+
+      ctx.textBaseline = 'alphabetic';
+      ctx.font = `bold ${Math.floor(h * 0.13)}px Arial`;
+      ctx.fillText('KOMINFO', w / 2, h * 0.77);
+      ctx.font = `${Math.floor(h * 0.105)}px Arial`;
+      ctx.fillText('KOTA MAKASSAR', w / 2, h * 0.91);
+
+      ctx.restore();
+    }
+
+    function rrect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+  </script>
+</body>
+
+</html>
