@@ -491,7 +491,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
         const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
         if (!lines.length) return;
 
-        const ag = { no: 0, jam: '-', acara: '-', tempat: '-', disposisi: '-', ppid: '-', zoomId: '', zoomPass: '' };
+        const ag = { no: 0, jam: '-', acara: '-', tempat: '-', disposisi: '-', ppid: '-', zoomId: '', zoomPass: '', pendamping: '' };
         const noM = lines[0].match(/^(\d+)/);
         if (noM) ag.no = parseInt(noM[1]);
 
@@ -504,6 +504,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
           else if (/^tempat\s*:/i.test(cl)) { ag.tempat = kv('tempat'); readingTempat = true; }
           else if (/^disposisi\s*:/i.test(cl)) { ag.disposisi = kv('disposisi'); readingTempat = false; }
           else if (/^ppid\s*:/i.test(cl)) { ag.ppid = kv('ppid'); readingTempat = false; }
+          else if (/^pendamping\s*:/i.test(cl)) { ag.pendamping = kv('pendamping'); readingTempat = false; }
           else if (readingTempat) {
             if (/meeting\s*id\s*:/i.test(cl)) ag.zoomId = cl.replace(/^meeting\s*id\s*:\s*/i, '').trim();
             else if (/^pas[a-z]*\s*:/i.test(cl)) ag.zoomPass = cl.replace(/^pas[a-z]*\s*:\s*/i, '').trim();
@@ -536,7 +537,8 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       ${ag.zoomId ? `<br><span class="lbl zoom-lbl">📹 Meeting ID :</span> <strong>${ag.zoomId}</strong>` : ''}
       ${ag.zoomPass ? `<br><span class="lbl zoom-lbl">🔑 Password :</span> <strong>${ag.zoomPass}</strong>` : ''}<br>
       <span class="lbl">Disposisi :</span> ${ag.disposisi} <br>
-      <span class="lbl">PPID :</span> ${ag.ppid}
+      <span class="lbl">PPID :</span> ${ag.ppid} <br>
+      <span class="lbl">Pendamping :</span> ${ag.pendamping}
     </div>`).join('');
 
       showStatus('ok', `✅ ${parsedAgendas.length} agenda berhasil di-parse!${infoHari}`);
@@ -568,10 +570,11 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       // Column widths
       const C_NO = 52;
       const C_WKT = 120;
-      const C_ACA = 700;
+      const C_ACA = 550;
       const C_TMP = 300;
       const C_PPID = 100;
-      const C_DIS = W - M * 2 - C_NO - C_WKT - C_ACA - C_TMP - C_PPID;
+      const C_PEND = 150;
+      const C_DIS = W - M * 2 - C_NO - C_WKT - C_ACA - C_TMP - C_PPID - C_PEND;
 
       const LH = 24;           // line-height per text row
       const ROW_PAD = 22;           // vertical padding inside table cell
@@ -603,6 +606,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
           (nLines(tc, ag.tempat, C_TMP - 18) + zoomExtra) * LH + ROW_PAD * 2,
           nLines(tc, ag.disposisi, C_DIS - 18) * LH + ROW_PAD * 2,
           nLines(tc, ag.ppid, C_PPID - 18) * LH + ROW_PAD * 2,
+          nLines(tc, ag.pendamping, C_PEND - 18) * LH + ROW_PAD * 2
         ];
         return Math.max(...h, 72);
       });
@@ -667,7 +671,8 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
         { w: C_WKT, label: 'Waktu' },
         { w: C_ACA, label: 'Acara' },
         { w: C_TMP, label: 'Tempat' },
-        { w: C_DIS, label: 'Disposisi' },
+        { w: C_PEND, label: 'Pendamping' },
+        { w: C_DIS, label: 'Pejabat' },
         { w: C_PPID, label: 'PPID' },
       ];
 
@@ -712,8 +717,9 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
         ctx.fillText(ag.jam, TX + C_NO + C_WKT / 2, mid);
         wrapUnderline(ctx, ag.acara, TX + C_NO + C_WKT, C_ACA, ry, rh, FS, LH);
         wrapUnderlineTempat(ctx, ag, TX + C_NO + C_WKT + C_ACA, C_TMP, ry, rh, FS, LH);
-        wrapUnderline(ctx, ag.disposisi, TX + C_NO + C_WKT + C_ACA + C_TMP, C_DIS, ry, rh, FS, LH);
-        wrapUnderline(ctx, ag.ppid, TX + C_NO + C_WKT + C_ACA + C_TMP + C_DIS, C_PPID, ry, rh, FS, LH);
+        wrapUnderline(ctx, ag.pendamping, TX + C_NO + C_WKT + C_ACA + C_TMP, C_PEND, ry, rh, FS, LH);
+        wrapUnderline(ctx, ag.disposisi, TX + C_NO + C_WKT + C_ACA + C_TMP + C_PEND, C_DIS, ry, rh, FS, LH);
+        wrapUnderline(ctx, ag.ppid, TX + C_NO + C_WKT + C_ACA + C_TMP + C_DIS + C_PEND, C_PPID, ry, rh, FS, LH);
 
         ry += rh;
       });
