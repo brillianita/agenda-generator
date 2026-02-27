@@ -412,10 +412,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
         ⬇️ Download Gambar PNG
       </a>
       <button class="btn-wa" id="btn-wa" onclick="shareToWhatsApp()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-        </svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Share ke WhatsApp
       </button>
     </div>
@@ -575,13 +572,13 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
         // Within each comma-segment, split by " dan " 
         // BUT we need to be careful: "Kepala Dinas dan Kabid PDE" → ["Kepala Dinas", "Kabid PDE"]
         // while "Kasubag Umum dan Kepegawaian" should NOT be split (it's one name)
-
+        
         // Heuristic: split on " dan " only if the part after "dan" looks like a new title
         // (starts with Kepala|Sekretaris|Kabid|Kasubag|PPTK|KTU|Kepala UPTD|didampingi)
-        const titlePattern = /\b(kepala|sekretaris|kabid|kasubag|pptk|ktu|uptd|staf|plt|bidang)\b/i;
-
+        const titlePattern = /\b(kepala|sekretaris|kabid|kasubag|pptk|ktu|uptd|staf|plt)\b/i;
+        
         const parts = segment.split(/\s+dan\s+/i);
-
+        
         if (parts.length === 1) {
           result.push(segment.trim());
           return;
@@ -674,13 +671,13 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       const tanggalVal = dt ? dt.tanggal : document.getElementById('inp-tanggal').value;
 
       parsedAgendas.forEach(ag => {
+        // Keterangan: gunakan override dari teks jika ada, jika tidak hitung otomatis
+        ag.keterangan = ag._ketOverride ? ag._ketOverride : getKeterangan(ag.disposisi);
         // Pakaian: gunakan override dari teks jika ada, jika tidak hitung otomatis
         ag.pakaian = ag._pakOverride ? ag._pakOverride : getPakaian(hariVal, ag.acara, tanggalVal);
         const split = splitDisposisi(ag.disposisi);
         ag.pejabat = split.pejabat;
         ag.pendamping = split.pendamping;
-        // Keterangan: gunakan override dari teks jika ada, jika tidak hitung otomatis
-        ag.keterangan = ag._ketOverride ? ag._ketOverride : getKeterangan(ag.pejabat);
       });
 
       const infoHari = dt
@@ -699,8 +696,8 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       <span class="lbl">Pejabat :</span> <strong>${ag.pejabat}</strong><br>
       <span class="lbl">Pendamping :</span> <strong>${ag.pendamping}</strong><br>
       <span class="lbl">PPID :</span> ${ag.ppid}<br>
-      <span class="lbl">Keterangan :</span> ${ag.keterangan}<br>
-      <span class="lbl">Pakaian :</span> ${ag.pakaian}<br>
+      <span class="lbl">Keterangan :</span> <strong style="color:${ag.keterangan === 'Dijadwalkan' ? '#1a7a40' : '#c07000'}">${ag.keterangan}</strong><br>
+      <span class="lbl">Pakaian :</span> <strong style="color:#1a3a5c">${ag.pakaian}</strong>
     </div>`).join('');
 
       showStatus('ok', `✅ ${parsedAgendas.length} agenda berhasil di-parse!${infoHari}`);
@@ -819,15 +816,15 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       const TY = HDR_H + DATE_H;
       const TX = M;
       const cols = [
-        { w: C_NO, label: 'No' },
-        { w: C_WKT, label: 'Waktu' },
-        { w: C_ACA, label: 'Kegiatan' },
-        { w: C_TMP, label: 'Tempat' },
+        { w: C_NO,   label: 'No' },
+        { w: C_WKT,  label: 'Waktu' },
+        { w: C_ACA,  label: 'Acara' },
+        { w: C_TMP,  label: 'Tempat' },
         { w: C_PEND, label: 'Pendamping' },
-        { w: C_DIS, label: 'Pejabat' },
+        { w: C_DIS,  label: 'Pejabat' },
         { w: C_PPID, label: 'PPID' },
-        { w: C_KET, label: 'Keterangan' },
-        { w: C_PAK, label: 'Pakaian' },
+        { w: C_KET,  label: 'Keterangan' },
+        { w: C_PAK,  label: 'Pakaian' },
       ];
 
       // thead
@@ -852,7 +849,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       parsedAgendas.forEach((ag, idx) => {
         const rh = rowH[idx];
         cx = TX;
-        ctx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#fff';
+        ctx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#f7faff';
         ctx.fillRect(TX, ry, W - M * 2, rh);
         cols.forEach(col => {
           ctx.strokeStyle = '#000';
@@ -877,25 +874,35 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
         // PPID
         wrapText(ctx, ag.ppid, TX + C_NO + C_WKT + C_ACA + C_TMP + C_PEND + C_DIS, C_PPID, ry, rh, FS, LH, '#000');
         // Keterangan
+        const ketColor = ag.keterangan === 'Dijadwalkan' ? '#1a6a30' : '#a05000';
         const ketFont = `bold ${FS}px Arial`;
-        wrapText(ctx, ag.keterangan, TX + C_NO + C_WKT + C_ACA + C_TMP + C_PEND + C_DIS + C_PPID, C_KET, ry, rh, FS, LH, '#000');
+        wrapText(ctx, ag.keterangan, TX + C_NO + C_WKT + C_ACA + C_TMP + C_PEND + C_DIS + C_PPID, C_KET, ry, rh, FS, LH, ketColor, ketFont);
         // Pakaian
         const pakFont = `bold ${FS}px Arial`;
-        wrapText(ctx, ag.pakaian, TX + C_NO + C_WKT + C_ACA + C_TMP + C_PEND + C_DIS + C_PPID + C_KET, C_PAK, ry, rh, FS, LH, '#000');
+        wrapText(ctx, ag.pakaian, TX + C_NO + C_WKT + C_ACA + C_TMP + C_PEND + C_DIS + C_PPID + C_KET, C_PAK, ry, rh, FS, LH, '#1a3a5c', pakFont);
 
         ry += rh;
       });
 
       // footer TTD
-      const fy = ry + 40, fx = 500 * 0.72;
+      const fy = ry + 40, fx = W * 0.72;
       ctx.textAlign = 'center'; ctx.fillStyle = '#000';
       ctx.font = `${FS}px Arial`;
       underlinedText(ctx, 'Mengetahui,', fx, fy + 10);
       ctx.fillText('TTD', fx, fy + 52);
       underlinedText(ctx, ttdName, fx, fy + 96);
 
+      // Generate unique filename: Agenda-Diskominfo-[Hari]-[Tanggal]-[timestamp].png
+      const hariSlug = hari.replace(/\s+/g, '-');
+      const tanggalSlug = tanggal.replace(/\s+/g, '-');
+      const ts = Date.now();
+      const uniqueName = `Agenda-Diskominfo-${hariSlug}-${tanggalSlug}-${ts}.png`;
       document.getElementById('output-section').style.display = 'block';
-      document.getElementById('dl-link').href = canvas.toDataURL('image/png');
+      const dataUrl = canvas.toDataURL('image/png');
+      const dlLink = document.getElementById('dl-link');
+      dlLink.href = dataUrl;
+      dlLink.download = uniqueName;
+      dlLink.dataset.filename = uniqueName;
       setTimeout(() => document.getElementById('output-section').scrollIntoView({ behavior: 'smooth' }), 100);
     }
 
@@ -1026,6 +1033,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
     async function shareToWhatsApp() {
       const canvas = document.getElementById('agenda-canvas');
       const btn = document.getElementById('btn-wa');
+      const filename = document.getElementById('dl-link').dataset.filename || 'Agenda-Diskominfo-Makassar.png';
 
       // Try Web Share API with file (supported on mobile browsers)
       if (navigator.canShare) {
@@ -1034,7 +1042,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
           btn.textContent = '⏳ Menyiapkan...';
 
           const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-          const file = new File([blob], 'Agenda-Diskominfo-Makassar.png', { type: 'image/png' });
+          const file = new File([blob], filename, { type: 'image/png' });
 
           if (navigator.canShare({ files: [file] })) {
             await navigator.share({
@@ -1062,11 +1070,11 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
     }
 
     function fallbackWA() {
-      // Download the image first, then open WhatsApp
       const canvas = document.getElementById('agenda-canvas');
+      const filename = document.getElementById('dl-link').dataset.filename || 'Agenda-Diskominfo-Makassar.png';
       const a = document.createElement('a');
       a.href = canvas.toDataURL('image/png');
-      a.download = 'Agenda-Diskominfo-Makassar.png';
+      a.download = filename;
       a.click();
 
       setTimeout(() => {
@@ -1074,8 +1082,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
         window.open(waUrl, '_blank');
       }, 800);
     }
-
-  </script>
+    </script>
 </body>
 
 </html>

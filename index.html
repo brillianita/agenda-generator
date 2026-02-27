@@ -894,8 +894,17 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       ctx.fillText('TTD', fx, fy + 52);
       underlinedText(ctx, ttdName, fx, fy + 96);
 
+      // Generate unique filename: Agenda-Diskominfo-[Hari]-[Tanggal]-[timestamp].png
+      const hariSlug = hari.replace(/\s+/g, '-');
+      const tanggalSlug = tanggal.replace(/\s+/g, '-');
+      const ts = Date.now();
+      const uniqueName = `Agenda-Diskominfo-${hariSlug}-${tanggalSlug}-${ts}.png`;
       document.getElementById('output-section').style.display = 'block';
-      document.getElementById('dl-link').href = canvas.toDataURL('image/png');
+      const dataUrl = canvas.toDataURL('image/png');
+      const dlLink = document.getElementById('dl-link');
+      dlLink.href = dataUrl;
+      dlLink.download = uniqueName;
+      dlLink.dataset.filename = uniqueName;
       setTimeout(() => document.getElementById('output-section').scrollIntoView({ behavior: 'smooth' }), 100);
     }
 
@@ -1026,6 +1035,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
     async function shareToWhatsApp() {
       const canvas = document.getElementById('agenda-canvas');
       const btn = document.getElementById('btn-wa');
+      const filename = document.getElementById('dl-link').dataset.filename || 'Agenda-Diskominfo-Makassar.png';
 
       // Try Web Share API with file (supported on mobile browsers)
       if (navigator.canShare) {
@@ -1034,7 +1044,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
           btn.textContent = '⏳ Menyiapkan...';
 
           const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-          const file = new File([blob], 'Agenda-Diskominfo-Makassar.png', { type: 'image/png' });
+          const file = new File([blob], filename, { type: 'image/png' });
 
           if (navigator.canShare({ files: [file] })) {
             await navigator.share({
@@ -1066,7 +1076,8 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       const canvas = document.getElementById('agenda-canvas');
       const a = document.createElement('a');
       a.href = canvas.toDataURL('image/png');
-      a.download = 'Agenda-Diskominfo-Makassar.png';
+      const filename = document.getElementById('dl-link').dataset.filename || 'Agenda-Diskominfo-Makassar.png';
+      a.download = filename;
       a.click();
 
       setTimeout(() => {
