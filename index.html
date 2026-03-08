@@ -886,8 +886,14 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       const fy = ry + 40, fx = 500 * 0.72;
       ctx.textAlign = 'center'; ctx.fillStyle = '#000';
       ctx.font = `${FS}px Arial`;
+
       underlinedText(ctx, 'Mengetahui,', fx, fy - 10);
-      ctx.drawImage(tte, 320, fx + 310, 70, 70)
+
+      // Gambar TTD di antara teks "Mengetahui," dan nama
+      // x = fx - 35 (center image), y = fy + 5 (di bawah teks atas)
+      ctx.drawImage(tte, fx - 35, fy + 5, 70, 70);
+
+      // Nama ditulis setelah image (fy + 5 + 70 + 10 = fy + 85)
       underlinedText(ctx, ttdName, fx, fy + 96);
 
       // Generate unique filename: Agenda-Diskominfo-[Hari]-[Tanggal]-[timestamp].png
