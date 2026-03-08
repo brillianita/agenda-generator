@@ -786,9 +786,10 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       ctx.lineWidth = 1;
       ctx.strokeRect(28, 28, W - 56, TOTAL_H - 56);
 
-      const [imgLeft, imgRight] = await Promise.all([
+      const [imgLeft, imgRight, tte] = await Promise.all([
         loadImgFromSrc('images/pemkot.png'),
         loadImgFromSrc('images/logo-diskominfo-makassar.png'),
+        loadImgFromSrc('images/tte.jpg'),
       ]);
       if (imgLeft) ctx.drawImage(imgLeft, 150, 50, 120, 120);
       else drawShieldLogo(ctx, 40, 26, 98);
@@ -885,8 +886,8 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       const fy = ry + 40, fx = 500 * 0.72;
       ctx.textAlign = 'center'; ctx.fillStyle = '#000';
       ctx.font = `${FS}px Arial`;
-      underlinedText(ctx, 'Mengetahui,', fx, fy + 10);
-      ctx.fillText('TTD', fx, fy + 52);
+      underlinedText(ctx, 'Mengetahui,', fx, fy - 10);
+      ctx.drawImage(tte, 320, fx + 310, 70, 70)
       underlinedText(ctx, ttdName, fx, fy + 96);
 
       // Generate unique filename: Agenda-Diskominfo-[Hari]-[Tanggal]-[timestamp].png
