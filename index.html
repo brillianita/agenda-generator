@@ -642,6 +642,8 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
           else if (/^acara\s*:/i.test(cl)) { ag.acara = kv('acara'); readingTempat = false; }
           else if (/^tempat\s*:/i.test(cl)) { ag.tempat = kv('tempat'); readingTempat = true; }
           else if (/^disposisi\s*:/i.test(cl)) { ag.disposisi = kv('disposisi'); readingTempat = false; }
+          else if (/^pejabat\s*:/i.test(cl)) { ag.pejabat = kv('pejabat'); readingTempat = false; }
+          else if (/^pendamping\s*:/i.test(cl)) { ag.pendamping = kv('pendamping'); readingTempat = false; }
           else if (/^ppid\s*:/i.test(cl)) { ag.ppid = kv('ppid'); readingTempat = false; }
           else if (/^keterangan\s*:/i.test(cl)) { ag._ketOverride = kv('keterangan'); readingTempat = false; }
           else if (/^pakaian\s*:/i.test(cl)) { ag._pakOverride = kv('pakaian'); readingTempat = false; }
@@ -672,8 +674,8 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
         // Pakaian: gunakan override dari teks jika ada, jika tidak hitung otomatis
         ag.pakaian = ag._pakOverride ? ag._pakOverride : getPakaian(hariVal, ag.acara, tanggalVal);
         const split = splitDisposisi(ag.disposisi);
-        ag.pejabat = split.pejabat;
-        ag.pendamping = split.pendamping;
+        ag.pejabat = split.pejabat !== '-' ? split.pejabat : ag.pejabat;
+        ag.pendamping = split.pendamping !== '-' ? split.pendamping : ag.pendamping;
         // Keterangan: gunakan override dari teks jika ada, jika tidak hitung otomatis
         ag.keterangan = ag._ketOverride ? ag._ketOverride : getKeterangan(ag.pejabat);
       });
