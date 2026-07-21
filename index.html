@@ -597,6 +597,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       // Check hari
       const hariLower = (hari || '').toLowerCase();
       if (['senin', 'selasa', 'rabu'].includes(hariLower)) return 'PDH';
+      if (['rabu'].includes(hariLower)) return 'PDH Hitam Putih';
       if (['kamis', 'jumat'].includes(hariLower)) return 'Batik';
       return 'PDH'; // default
     }
