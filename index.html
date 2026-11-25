@@ -616,6 +616,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
     // If both present: Kepala Dinas = Pejabat, Sekretaris Dinas = Pendamping
     // If only Sekretaris Dinas: Sekretaris Dinas = Pejabat
     // If neither: ALL Pejabat Pengganti found in disposisi = Pejabat
+    // "Seluruh Pejabat Struktural" = always Pejabat
     // Everyone else = Pendamping
     const PEJABAT_PENGGANTI = [
       /kabid/i,     // semua Kabid
@@ -637,9 +638,9 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       const sekdisIdx = tokens.findIndex(tok => /sekretaris\s+dinas/i.test(tok));
       const topIdx = kadisIdx !== -1 ? kadisIdx : sekdisIdx;
 
-      const isPejabatTok = topIdx !== -1
-        ? (_, i) => i === topIdx
-        : tok => PEJABAT_PENGGANTI.some(re => re.test(tok));
+      const isPejabatTok = (tok, i) =>
+        /pejabat\s+struktural/i.test(tok) ||
+        (topIdx !== -1 ? i === topIdx : PEJABAT_PENGGANTI.some(re => re.test(tok)));
 
       const pejabatList = tokens.filter(isPejabatTok);
       const pendampingList = tokens.filter((tok, i) => !isPejabatTok(tok, i));
