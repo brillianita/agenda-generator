@@ -428,7 +428,7 @@
 
           <div style="display: flex; flex-direction: column; gap: 4px;">
             <label style="font-size: 12px; font-weight: 600; color: #555;">PPID</label>
-            <input type="text" id="inp-apel-ppid" value="Anto"
+            <input type="text" id="inp-apel-ppid" value="Fajar"
               style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; background: #fff; outline: none;">
           </div>
 
@@ -703,6 +703,14 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       });
       return map;
     }
+
+    // "07.30 Wita" / "08:00" / "9 Wita" → menit sejak 00.00; tanpa jam → paling akhir
+    function jamToMinutes(jam) {
+      const m = (jam || '').match(/(\d{1,2})(?:\s*[.:]\s*(\d{2}))?/);
+      if (!m) return 24 * 60;
+      return parseInt(m[1]) * 60 + (m[2] ? parseInt(m[2]) : 0);
+    }
+
     function parsePpidMap() {
       const raw = document.getElementById('txt-ppid').value.trim();
       const map = {};
@@ -824,6 +832,10 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
           disposisi: '-', zoomId: '', zoomPass: ''
         });
       }
+
+      // Urutkan berdasarkan jam, lalu beri nomor ulang (abaikan nomor dari teks)
+      parsedAgendas.sort((a, b) => jamToMinutes(a.jam) - jamToMinutes(b.jam));
+      parsedAgendas.forEach((ag, i) => { ag.no = i + 1; });
 
       const renderItem = (ag, i) => `
       <div class="parsed-item">
