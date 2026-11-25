@@ -610,88 +610,41 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       return 'Dijadwalkan';
     }
 
-    // ── Split Disposisi into Pejabat (max 1) & Pendamping ──
-    // Priority: Kepala Dinas > Sekretaris Dinas
+    // ── Split Disposisi into Pejabat & Pendamping ──
+    // Priority: Kepala Dinas > Sekretaris Dinas > Pejabat Pengganti
     // If both present: Kepala Dinas = Pejabat, Sekretaris Dinas = Pendamping
     // If only Sekretaris Dinas: Sekretaris Dinas = Pejabat
+    // If neither: ALL Pejabat Pengganti found in disposisi = Pejabat
     // Everyone else = Pendamping
+    const PEJABAT_PENGGANTI = [
+      /kabid/i,     // semua Kabid
+      /war\s*room/i,
+      /kasub+ag/i,  // semua Kasubag / Kasubbag
+    ];
+
     function splitDisposisi(disposisi) {
       if (!disposisi || disposisi.trim() === '' || disposisi.trim() === '-') {
         return { pejabat: '-', pendamping: '-' };
       }
 
       const raw = disposisi.trim();
-      const tokens = splitTokens(raw);
+      const tokens = splitTokens(raw).map(t => t.trim()).filter(Boolean);
 
-      let pejabat = null;
-      const pendampingList = [];
+      // Cari Pejabat sesuai prioritas: Kepala Dinas → Sekretaris Dinas (1 orang)
+      // → semua Pejabat Pengganti
+      const kadisIdx = tokens.findIndex(tok => /kepala\s+dinas/i.test(tok));
+      const sekdisIdx = tokens.findIndex(tok => /sekretaris\s+dinas/i.test(tok));
+      const topIdx = kadisIdx !== -1 ? kadisIdx : sekdisIdx;
 
-      tokens.forEach(tok => {
-        tok = tok.trim();
-        if (!tok) return;
+      const isPejabatTok = topIdx !== -1
+        ? (_, i) => i === topIdx
+        : tok => PEJABAT_PENGGANTI.some(re => re.test(tok));
 
-        const isKepala = /kepala\s+dinas/i.test(tok);
-        const isSekretaris = /sekretaris\s+dinas/i.test(tok);
-        const isKabidAptika = /kabid\s+aptika/i.test(tok);
-        const isKabidPDE = /kabid\s+pde/i.test(tok);
-        const isKabidPersandian = /kabid\s+persandian/i.test(tok);
-        const isPerencanaan = /kasubag\s+perencanaan\s+dan\s+pelaporan/i.test(tok);
-        const isKtu = /kepala\s+uptd\s+war\s+room/i.test(tok);
-
-        if (isKepala) {
-          if (!pejabat) {
-            // Kepala Dinas selalu jadi Pejabat
-            pejabat = tok;
-          } else {
-            pendampingList.push(tok);
-          }
-        } else if (isSekretaris) {
-          if (!pejabat) {
-            // Sekretaris Dinas jadi Pejabat hanya jika belum ada Pejabat
-            pejabat = tok;
-          } else {
-            // Sudah ada Kepala Dinas sebagai Pejabat → Sekretaris jadi Pendamping
-            pendampingList.push(tok);
-          }
-        // } else if (isKabidAptika) {
-        //   if (!pejabat) {
-        //     // Kabid Aptika jadi Pejabat hanya jika belum ada Pejabat
-        //     pejabat = tok;
-        //   } else {
-        //     // Sudah ada Kepala Dinas sebagai Pejabat → Kabid Aptika jadi Pendamping
-        //     pendampingList.push(tok);
-        //   }
-        // } else if (isKabidPDE) {
-        //   if (!pejabat) {
-        //     // Kabid PDE jadi Pejabat hanya jika belum ada Pejabat
-        //     pejabat = tok;
-        //   } else {
-        //     // Sudah ada Kepala Dinas sebagai Pejabat → Kabid PDE jadi Pendamping
-        //     pendampingList.push(tok);
-        //   }
-        // } else if (isKabidPersandian) {
-        //   if (!pejabat) {
-        //     // Kabid Persandian jadi Pejabat hanya jika belum ada Pejabat
-        //     pejabat = tok;
-        //   } else {
-        //     // Sudah ada Kepala Dinas sebagai Pejabat → Kabid Persandian jadi Pendamping
-        //     pendampingList.push(tok);
-        //   }
-        // } else if (isPerencanaan) {
-        //   if (!pejabat) {
-        //     // Kasubag Perencanaan dan Pelaporan jadi Pejabat hanya jika belum ada Pejabat
-        //     pejabat = tok;
-        //   } else {
-        //     // Sudah ada Kepala Dinas sebagai Pejabat → Kasubag Perencanaan dan Pelaporan jadi Pendamping
-        //     pendampingList.push(tok);
-        //   }
-        } else {
-          pendampingList.push(tok);
-        }
-      });
+      const pejabatList = tokens.filter(isPejabatTok);
+      const pendampingList = tokens.filter((tok, i) => !isPejabatTok(tok, i));
 
       return {
-        pejabat: pejabat || '-',
+        pejabat: pejabatList.length ? pejabatList.join(', ') : '-',
         pendamping: pendampingList.length ? pendampingList.join(', ') : '-',
       };
     }
@@ -701,16 +654,19 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       return /kepala\s+dinas/i.test(tok) || /sekretaris\s+dinas/i.test(tok);
     }
 
-    // Smart tokenizer: splits on ", " and " dan " but tries to keep
+    // Smart tokenizer: splits on ", ", " didampingi " and " dan " but tries to keep
     // multi-word titles like "Kepala Dinas", "Sekretaris Dinas", "Kabid PDE" intact.
     function splitTokens(raw) {
-      // Split by comma first
-      const byComma = raw.split(/\s*,\s*/);
+      // Split by comma and "didampingi" first
+      // e.g. "Kepala Dinas didampingi Kabid PDE" → split into two
+      const byComma = raw.split(/\s*,\s*|\s+didampingi\s+/i);
       const result = [];
 
       byComma.forEach(segment => {
-        // Split on " dan " — EXCEPT when followed by "Kepegawaian"
+        // Split on " dan " — EXCEPT when followed by "Kepegawaian" / "Pelaporan" / "Keuangan"
         // e.g. "Kasubag Umum dan Kepegawaian" → stay as one token
+        // e.g. "Kasubag Perencanaan dan Pelaporan" → stay as one token
+        // e.g. "Kasubag Perencanaan dan Keuangan" → stay as one token
         // e.g. "Kepala Dinas dan Kabid PDE"   → split into two
         // e.g. "Sekretaris Dinas dan Salsa"    → split into two
         const parts = segment.split(/\s+dan\s+/i);
@@ -722,8 +678,8 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
 
         let current = parts[0];
         for (let i = 1; i < parts.length; i++) {
-          if (/^kepegawaian\b/i.test(parts[i].trim())) {
-            // "dan Kepegawaian" is part of the previous token — merge back
+          if (/^(kepegawaian|pelaporan|keuangan)\b/i.test(parts[i].trim())) {
+            // "dan Kepegawaian" / "dan Pelaporan" / "dan Keuangan" is part of the previous token — merge back
             current += ' dan ' + parts[i];
           } else {
             result.push(current.trim());
@@ -1212,7 +1168,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
 
       // Gambar TTD di antara teks "Mengetahui," dan nama
       // x = fx - 35 (center image), y = fy + 5 (di bawah teks atas)
-      ctx.drawImage(tte, fx - 35, fy + 5, 70, 70);
+      if (tte) ctx.drawImage(tte, fx - 35, fy + 5, 70, 70);
 
       // Nama ditulis setelah image (fy + 5 + 70 + 10 = fy + 85)
       underlinedText(ctx, ttdName, fx, fy + 96);
