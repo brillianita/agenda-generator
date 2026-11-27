@@ -617,6 +617,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
     // If only Sekretaris Dinas: Sekretaris Dinas = Pejabat
     // If neither: ALL Pejabat Pengganti found in disposisi = Pejabat
     // "Seluruh Pejabat Struktural" = always Pejabat
+    // Anything containing "Staf" = always Pendamping
     // Everyone else = Pendamping
     const PEJABAT_PENGGANTI = [
       /kabid/i,     // semua Kabid
@@ -632,15 +633,18 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       const raw = disposisi.trim();
       const tokens = splitTokens(raw).map(t => t.trim()).filter(Boolean);
 
+      // Yang mengandung "Staf" selalu jadi Pendamping
+      const isStaf = tok => /\bstaf/i.test(tok);
+
       // Cari Pejabat sesuai prioritas: Kepala Dinas → Sekretaris Dinas (1 orang)
       // → semua Pejabat Pengganti
-      const kadisIdx = tokens.findIndex(tok => /kepala\s+dinas/i.test(tok));
-      const sekdisIdx = tokens.findIndex(tok => /sekretaris\s+dinas/i.test(tok));
+      const kadisIdx = tokens.findIndex(tok => !isStaf(tok) && /kepala\s+dinas/i.test(tok));
+      const sekdisIdx = tokens.findIndex(tok => !isStaf(tok) && /sekretaris\s+dinas/i.test(tok));
       const topIdx = kadisIdx !== -1 ? kadisIdx : sekdisIdx;
 
-      const isPejabatTok = (tok, i) =>
+      const isPejabatTok = (tok, i) => !isStaf(tok) && (
         /pejabat\s+struktural/i.test(tok) ||
-        (topIdx !== -1 ? i === topIdx : PEJABAT_PENGGANTI.some(re => re.test(tok)));
+        (topIdx !== -1 ? i === topIdx : PEJABAT_PENGGANTI.some(re => re.test(tok))));
 
       const pejabatList = tokens.filter(isPejabatTok);
       const pendampingList = tokens.filter((tok, i) => !isPejabatTok(tok, i));
@@ -1033,27 +1037,20 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       tc.font = `${FS}px Arial`;
 
       function nLines(ctx2, text, maxW) {
-        if (!text || text === '-' || text === '') return 1;
-        const words = text.split(' ');
-        let line = '', n = 1;
-        for (const w of words) {
-          const t = line ? line + ' ' + w : w;
-          if (ctx2.measureText(t).width > maxW && line) { n++; line = w; }
-          else line = t;
-        }
-        return n;
+        return breakLines(ctx2, text || '-', maxW).length;
       }
 
       const rowH = parsedAgendas.map(ag => {
-        const zoomExtra = (ag.zoomId ? 1 : 0) + (ag.zoomPass ? 1 : 0);
+        const zoomLines = [ag.zoomId && 'ID: ' + ag.zoomId, ag.zoomPass && 'Pass: ' + ag.zoomPass].filter(Boolean);
         const h = [
+          nLines(tc, ag.jam, C_WKT - 18) * LH + ROW_PAD * 2,
           nLines(tc, ag.acara, C_ACA - 18) * LH + ROW_PAD * 2,
-          (nLines(tc, ag.tempat, C_TMP - 18) + zoomExtra) * LH + ROW_PAD * 2,
-          nLines(tc, ag.disposisi, C_DIS - 18) * LH + ROW_PAD * 2,
+          (nLines(tc, ag.tempat, C_TMP - 18) + zoomLines.reduce((n, l) => n + nLines(tc, l, C_TMP - 18), 0)) * LH + ROW_PAD * 2,
+          nLines(tc, ag.pejabat, C_DIS - 18) * LH + ROW_PAD * 2,
           nLines(tc, ag.ppid, C_PPID - 18) * LH + ROW_PAD * 2,
           nLines(tc, ag.pendamping, C_PEND - 18) * LH + ROW_PAD * 2,
-          1 * LH + ROW_PAD * 2, // keterangan
-          1 * LH + ROW_PAD * 2, // pakaian
+          nLines(tc, ag.keterangan, C_KET - 18) * LH + ROW_PAD * 2,
+          nLines(tc, ag.pakaian, C_PAK - 18) * LH + ROW_PAD * 2,
         ];
         return Math.max(...h, 72);
       });
@@ -1152,7 +1149,7 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
         // No
         ctx.fillText(String(ag.no || idx + 1), TX + C_NO / 2, mid);
         // Waktu
-        ctx.fillText(ag.jam, TX + C_NO + C_WKT / 2, mid);
+        wrapText(ctx, ag.jam, TX + C_NO, C_WKT, ry, rh, FS, LH, '#000');
         // Acara
         wrapText(ctx, ag.acara, TX + C_NO + C_WKT, C_ACA, ry, rh, FS, LH, '#000');
         // Tempat
@@ -1201,19 +1198,32 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       setTimeout(() => document.getElementById('output-section').scrollIntoView({ behavior: 'smooth' }), 100);
     }
 
+    // Pecah teks jadi baris-baris yang muat di maxW.
+    // Kata yang lebih panjang dari kolom dipotong per huruf ke baris berikutnya.
+    function breakLines(ctx, text, maxW) {
+      const fits = s => ctx.measureText(s).width <= maxW;
+      const lines = [];
+      let line = '';
+      for (const word of String(text).split(/\s+/).filter(Boolean)) {
+        const t = line ? line + ' ' + word : word;
+        if (fits(t)) { line = t; continue; }
+        if (line) lines.push(line);
+        line = '';
+        for (const ch of word) {
+          if (line && !fits(line + ch)) { lines.push(line); line = ''; }
+          line += ch;
+        }
+      }
+      if (line) lines.push(line);
+      return lines.length ? lines : ['-'];
+    }
+
     // Generic text wrap helper with optional color/font override
     function wrapText(ctx, text, colX, colW, rowY, rowH, fs, lh, color, fontOverride) {
       ctx.font = fontOverride || `${fs}px Arial`;
       const maxW = colW - 18, cx = colX + colW / 2;
       const safeText = (!text || text === '-') ? '-' : text;
-      const words = safeText.split(' ');
-      let line = '', lines = [];
-      for (const w of words) {
-        const t = line ? line + ' ' + w : w;
-        if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; }
-        else line = t;
-      }
-      if (line) lines.push(line);
+      const lines = breakLines(ctx, safeText, maxW);
       const totalH = lines.length * lh;
       let y = rowY + (rowH - totalH) / 2 + lh * 0.82;
       ctx.textAlign = 'center';
@@ -1227,23 +1237,11 @@ AGENDA ACARA DINAS KOMUNIKASI DAN INFORMATIKA KOTA MAKASSAR
       const maxW = colW - 18;
       const cx = colX + colW / 2;
 
-      function splitLines(text) {
-        const words = text.split(' ');
-        let line = '', out = [];
-        for (const w of words) {
-          const t = line ? line + ' ' + w : w;
-          if (ctx.measureText(t).width > maxW && line) { out.push(line); line = w; }
-          else line = t;
-        }
-        if (line) out.push(line);
-        return out;
-      }
-
       ctx.font = `${fs}px Arial`;
-      const mainLines = splitLines(ag.tempat || '-');
+      const mainLines = breakLines(ctx, ag.tempat || '-', maxW);
       const zoomLines = [];
-      if (ag.zoomId) zoomLines.push('ID: ' + ag.zoomId);
-      if (ag.zoomPass) zoomLines.push('Pass: ' + ag.zoomPass);
+      if (ag.zoomId) zoomLines.push(...breakLines(ctx, 'ID: ' + ag.zoomId, maxW));
+      if (ag.zoomPass) zoomLines.push(...breakLines(ctx, 'Pass: ' + ag.zoomPass, maxW));
 
       const allLines = mainLines.concat(zoomLines);
       const totalH = allLines.length * lh;
